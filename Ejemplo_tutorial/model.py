@@ -42,17 +42,16 @@ class MoneyModel(Model):
         barrera_contagios_inicial = (contagios_iniciales/100)*number_of_agents
         
         media = 0
+        nums = 0
         # Creamos todos los agentes, a los cuales les vamos a asignar una edad en funcion de una distribucion normal
         # ademas en funcion de la poblacion inicialmente contagiada, comenzaran con covid o no
         for i in range(self.num_agents):
             
-            # generamos la edad en funcion de una distribucion normal entre 1 y 100
-            x = np.arange(1, 100)
-            xU, xL = x + 0.5, x - 0.5 
-            prob = ss.norm.cdf(xU, scale = 3) - ss.norm.cdf(xL, scale = 3)
-            prob = prob / prob.sum() # normalize the probabilities so their sum is 1
-            nums = np.random.choice(x, size = 1, p = prob)
+            nums = 0
+            for j in range(11):
+                nums += random.randint(1, 10)
             
+            nums -= 10
             media += nums
             
             # Evaluamos en funcion de la generacion si inician contagiados o no
@@ -60,7 +59,7 @@ class MoneyModel(Model):
                 a = CovidAgent(i, self, tipo_contagio=NO_CONTAGIADO ,edad=nums,cepa_covid=self.cepa_covid)
             else:
                 a = CovidAgent(i, self, tipo_contagio=self.cepa_covid ,edad=nums,cepa_covid=self.cepa_covid)
-            print (nums,"ppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp",)
+            #print (nums,"ppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp",)
             self.schedule.add(a)
 
             # Add the agent to a random grid cell
@@ -74,7 +73,7 @@ class MoneyModel(Model):
             
     #def get_cepa(self):
     #   return int(self.cepa_covid)
-        print (media/self.num_agents,"uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu",)
+        #print (media/self.num_agents,"uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu",)
     
     def step(self):
         "Advance the model by one step."

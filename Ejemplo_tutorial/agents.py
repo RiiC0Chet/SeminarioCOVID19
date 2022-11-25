@@ -72,7 +72,7 @@ class CovidAgent(Agent):
                 
                 # calculamos la probabilidad de haberse contagiado con este contacto en concreto
                 # sumamos en funcion de la edad la % de contagio y de la variante
-                probabilidad_contagio = PROB_CONTAGIO_VARIANTE[self.cepa_covid] + PROB_CONTAGIO_EDAD[self.edad-1]
+                probabilidad_contagio = PROB_CONTAGIO_VARIANTE[self.cepa_covid] + PROB_CONTAGIO_EDAD[round(self.edad/10)]
 
                 # comprobamos la casila en la que se encuentra para sumar o reducir la posibilidad de contagio
                 # teniendo en cuenta que no es lo mismo encontrarse en una diagonal que al lado
@@ -88,7 +88,7 @@ class CovidAgent(Agent):
                 # si el numero aleatorio entre 0 y 1 sale menor se cumple la probabilidad
                 probabilidad_efeciva = self.random.random()
                 if( probabilidad_efeciva < probabilidad_contagio):
-                    print("OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
+                    #print("OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
                     print(probabilidad_efeciva,"          ",probabilidad_contagio)
                     self.tipo_contagio = agente.tipo_contagio
     
@@ -104,16 +104,19 @@ class CovidAgent(Agent):
 
     # Creamos la funcion de movimiento de los agentes de forma aleatoria
     def move(self):
-        
         # Guardamos en una lista las posibles casillas a las que se podria dirigir el agente
         possible_steps = self.model.grid.get_neighborhood(
             self.pos, moore=True, include_center=False )
         
+        print(possible_steps)
+        
+        # No sabemos por que asi funciona 
         # Comprobamos si de esa lista existe alguna que no este ocupada y hacemos otra lista
-        for casilla in possible_steps:
+        #for casilla in possible_steps:
             
-            if(self.model.grid.is_cell_empty(casilla) == False):
-                possible_steps.remove(casilla)
+            #if(self.model.grid.is_cell_empty(casilla) == False):
+                #possible_steps.remove(casilla)
+            
                 
         # Comprobamos que haya alguna casilla en esa lista de no ocupada
         if(len(possible_steps) > 0):
@@ -124,3 +127,5 @@ class CovidAgent(Agent):
             if(self.model.grid.is_cell_empty(new_position) == True):
                 self.model.grid.move_agent(self, new_position)
             #print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+        if(len(possible_steps)==0):
+            print("No puedo moverme")
