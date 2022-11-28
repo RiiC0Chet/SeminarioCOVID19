@@ -6,6 +6,9 @@ CEPA_LEVE = 1
 CEPA_MEDIA = 2
 CEPA_AGRESIVA =3
 
+LIBRE_MOVIMIENTO = 0
+NO_MOVILIDAD = 1
+
 # Probabilidades de contagio en funcion de la variante covid
 PROB_CONTAGIO_VARIANTE = numpy.array([0.0,0.2,0.4,0.6])
 
@@ -46,16 +49,19 @@ PROBABILIDAD_CURA = numpy.array([0,0.30,0.20,0.10])
 
 class CovidAgent(Agent):
 
-    def __init__(self, unique_id, model, tipo_contagio, edad, cepa_covid):
+    def __init__(self, unique_id, model, tipo_contagio, edad, cepa_covid, movimiento):
         super().__init__(unique_id, model)
         self.tipo_contagio = int(tipo_contagio)
         self.edad = edad
         self.duracion_contagio = 0
         self.cepa_covid = int(cepa_covid)
+        self.libre_movimiento = movimiento
+
 
     # funcion por frames del modelo
     def step(self):
-        self.move()
+        if(self.libre_movimiento == LIBRE_MOVIMIENTO):
+            self.move()
         if self.tipo_contagio == 0:
             self.contagiarse()
         else:
@@ -72,18 +78,23 @@ class CovidAgent(Agent):
                 
                 # calculamos la probabilidad de haberse contagiado con este contacto en concreto
                 # sumamos en funcion de la edad la % de contagio y de la variante
-                probabilidad_contagio = PROB_CONTAGIO_VARIANTE[self.cepa_covid] + PROB_CONTAGIO_EDAD[round(self.edad/10)]
+                # probabilidad_contagio = PROB_CONTAGIO_VARIANTE[self.cepa_covid] + PROB_CONTAGIO_EDAD[round(self.edad/10)]
 
-                # comprobamos la casila en la que se encuentra para sumar o reducir la posibilidad de contagio
+                # La probabilidad de contagio se ve aumentada un % en función de la edad
+                
+
+                # comprobamos la casilla en la que se encuentra para sumar o reducir la posibilidad de contagio
                 # teniendo en cuenta que no es lo mismo encontrarse en una diagonal que al lado
                 
                 # si la diferencia entre las posiciones es 0, 2 o -2 son diagonales, se trata de celdas adyacentes y si no se trata de diagonales
-                if( (self.pos[0]+self.pos[0])-(agente.pos[1]+agente.pos[1]) == 0 
-                    or (self.pos[0]+self.pos[0])-(agente.pos[1]+agente.pos[1]) == 2
-                    or (self.pos[0]+self.pos[0])-(agente.pos[1]+agente.pos[1]) == -2):
-                    probabilidad_contagio += 0.1
+                if( (self.pos[0]+self.pos[1])-(agente.pos[0]+agente.pos[1]) == 0 
+                    or (self.pos[0]+self.pos[1])-(agente.pos[0]+agente.pos[1]) == 2
+                    or (self.pos[0]+self.pos[1])-(agente.pos[0]+agente.pos[1]) == -2):
+                    # probabilidad_contagio += 0.1
+                    # Lo multiplicamos por 0.95 porque así tiene decrecen las probabilidades en un 5%
+                    probabilidad_contagio = PROB_CONTAGIO_VARIANTE[self.cepa_covid] *(1 +  PROB_CONTAGIO_EDAD[round(self.edad/10)])*0.95
                 else:
-                    probabilidad_contagio -= 0.1
+                    probabilidad_contagio = PROB_CONTAGIO_VARIANTE[self.cepa_covid] *(1 +  PROB_CONTAGIO_EDAD[round(self.edad/10)])*1.1
                 
                 # si el numero aleatorio entre 0 y 1 sale menor se cumple la probabilidad
                 probabilidad_efeciva = self.random.random()
@@ -94,12 +105,23 @@ class CovidAgent(Agent):
     
     # Comprobamos si esta contagiado, si ya se ha curado o no
     def curarse(self):
-        
-        if (self.duracion_contagio > TIEMPO_CONTAGIO[self.tipo_contagio] and self.random.random() < (((1+PROBABILIDAD_CURA[self.cepa_covid])**(self.duracion_contagio - TIEMPO_CONTAGIO[self.tipo_contagio]))-1) ):
+        probabilidad_cura = ((1+PROBABILIDAD_CURA[self.cepa_covid])**(self.duracion_contagio - TIEMPO_CONTAGIO[self.tipo_contagio])-1)
+
+        # Si fuesen iguales estaríamos exponiendo a 0 y al sumar 1 la probabilidad es de 1
+        if(self.duracion_contagio == TIEMPO_CONTAGIO[self.tipo_contagio]):
+            probabilidad_cura =PROBABILIDAD_CURA[self.cepa_covid]
+
+
+        probabilidad_cura = probabilidad_cura + (probabilidad_cura * (self.model.capacidad_neta()))
+        # print("--------->",(probabilidad_cura))
+
+
+        if (self.duracion_contagio > TIEMPO_CONTAGIO[self.tipo_contagio] and self.random.random() < (probabilidad_cura)):
             self.tipo_contagio = 0
             self.duracion_contagio = 0
         else:
             self.duracion_contagio = self.duracion_contagio + 1 
+
 
 
     # Creamos la funcion de movimiento de los agentes de forma aleatoria

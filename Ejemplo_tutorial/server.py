@@ -30,10 +30,10 @@ simulation_params = {
     
     "porcentaje_libre_movimiento": UserSettableParameter(
         "slider",
-        "Porcentaje de restriccion de movimiento",
+        "Porcentaje de agentes con libertad de movimiento",
         50, #default
         0,  #min
-        75, #max
+        100, #max
         1,  #step
         description="Escoge el porcentaje de poblacion que iniciara la simulacion en cuarentena",
     ),

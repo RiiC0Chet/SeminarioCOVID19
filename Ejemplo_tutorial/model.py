@@ -15,6 +15,8 @@ CEPA_LEVE = 1
 CEPA_MEDIA = 2
 CEPA_AGRESIVA = 3
 
+LIBRE_MOVIMIENTO = 0
+NO_MOVILIDAD = 1
 class MoneyModel(Model):
     "A model with some number of agents."
 
@@ -22,10 +24,10 @@ class MoneyModel(Model):
         
         # Inicializamos las variables de estado del modelo
         self.num_agents = number_of_agents
-        self.porcentaje_libre_movimiento = porcentaje_libre_movimiento
+        self.porcentaje_libre_movimiento = porcentaje_libre_movimiento/100
         self.capacidad_sanidad = capacidad_sanidad
         self.cepa_covid = cepa_covid
-        
+        self.arr_agents = []
         # Cambiamos a tipo de variable entera en funcion de la cepa para poder operar mejor
         if(cepa_covid == "Cepa leve"):
             self.cepa_covid = CEPA_LEVE
@@ -43,6 +45,10 @@ class MoneyModel(Model):
         
         media = 0
         nums = 0
+
+        # Cantidad de agentes con libertad de movimiento
+        cantidad_agentes_movimiento = round(number_of_agents*self.porcentaje_libre_movimiento)
+
         # Creamos todos los agentes, a los cuales les vamos a asignar una edad en funcion de una distribucion normal
         # ademas en funcion de la poblacion inicialmente contagiada, comenzaran con covid o no
         for i in range(self.num_agents):
@@ -56,9 +62,20 @@ class MoneyModel(Model):
             
             # Evaluamos en funcion de la generacion si inician contagiados o no
             if(i > barrera_contagios_inicial):
-                a = CovidAgent(i, self, tipo_contagio=NO_CONTAGIADO ,edad=nums,cepa_covid=self.cepa_covid)
+                if(cantidad_agentes_movimiento>0):
+                    a = CovidAgent(i, self, tipo_contagio=NO_CONTAGIADO ,edad=nums,cepa_covid=self.cepa_covid, movimiento=LIBRE_MOVIMIENTO)
+                    cantidad_agentes_movimiento-=1
+                else:
+                    a = CovidAgent(i, self, tipo_contagio=NO_CONTAGIADO ,edad=nums,cepa_covid=self.cepa_covid, movimiento=NO_MOVILIDAD)
             else:
-                a = CovidAgent(i, self, tipo_contagio=self.cepa_covid ,edad=nums,cepa_covid=self.cepa_covid)
+                if(cantidad_agentes_movimiento>0):
+                    a = CovidAgent(i, self, tipo_contagio=self.cepa_covid ,edad=nums,cepa_covid=self.cepa_covid, movimiento=LIBRE_MOVIMIENTO)
+                    cantidad_agentes_movimiento-=1
+                else:
+                    a = CovidAgent(i, self, tipo_contagio=self.cepa_covid ,edad=nums,cepa_covid=self.cepa_covid, movimiento=NO_MOVILIDAD)
+            
+            self.arr_agents=np.append(self.arr_agents, a)
+
             #print (nums,"ppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp",)
             self.schedule.add(a)
 
@@ -78,3 +95,11 @@ class MoneyModel(Model):
     def step(self):
         "Advance the model by one step."
         self.schedule.step()
+
+    def capacidad_neta(self):
+        sum=0
+        for i in range(self.num_agents):
+            if(self.arr_agents[i].tipo_contagio != NO_CONTAGIADO):
+                sum+=1
+        capacidad_efectiva = self.capacidad_sanidad/100 - (sum/self.num_agents)
+        return capacidad_efectiva
