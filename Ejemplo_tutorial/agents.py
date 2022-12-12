@@ -12,6 +12,9 @@ NO_MOVILIDAD = 1
 # Probabilidades de contagio en funcion de la variante covid
 PROB_CONTAGIO_VARIANTE = numpy.array([0.0,0.2,0.4,0.6])
 
+PROB_MUERTE_VARIANTE = numpy.array([0.0,0.02,0.04,0.06])
+
+
 # Probabilidades de contagio extra en funcion de la edad
 # Para el codigo simplemente dividiremos la edad entre 10 y nos 
 # indicará la posición del vector a la que tenemos que ir.
@@ -30,7 +33,7 @@ PROB_CONTAGIO_EDAD = numpy.array([0.05,0.1,0.15,0.2,0.25,0.35,0.45,0.5,0.55,0.6]
 # Probabilidades de muerte en funcion de la edad
 # Para el codigo simplemente dividiremos la edad entre 10 y nos 
 # indicará la posición del vector a la que tenemos que ir.
-PROB_MUERTE = numpy.array([0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1])
+PROB_MUERTE_EDAD = numpy.array([0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1])
 
 #PROB_FALLECIMIENTO_1_10 = 0.01
 #PROB_FALLECIMIENTO_11_20 = 0.02
@@ -65,6 +68,7 @@ class CovidAgent(Agent):
         if self.tipo_contagio == 0:
             self.contagiarse()
         else:
+            self.fallecer()
             self.curarse()
     
     # funcion en la que comprobamos si se va a contagiar el nuevo agente o no
@@ -99,8 +103,9 @@ class CovidAgent(Agent):
                 # si el numero aleatorio entre 0 y 1 sale menor se cumple la probabilidad
                 probabilidad_efeciva = self.random.random()
                 if( probabilidad_efeciva < probabilidad_contagio):
-                    #print("OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
-                    print(probabilidad_efeciva,"          ",probabilidad_contagio)
+                    #print(probabilidad_efeciva,"          ",probabilidad_contagio)
+                    self.model.no_contagiados = self.model.no_contagiados - 1
+                    self.model.contagiados = self.model.contagiados + 1
                     self.tipo_contagio = agente.tipo_contagio
     
     # Comprobamos si esta contagiado, si ya se ha curado o no
@@ -113,41 +118,36 @@ class CovidAgent(Agent):
 
 
         probabilidad_cura = probabilidad_cura + (probabilidad_cura * (self.model.capacidad_neta()))
-        # print("--------->",(probabilidad_cura))
 
 
         if (self.duracion_contagio > TIEMPO_CONTAGIO[self.tipo_contagio] and self.random.random() < (probabilidad_cura)):
+            self.model.no_contagiados = self.model.no_contagiados + 1
+            self.model.contagiados = self.model.contagiados-1
             self.tipo_contagio = 0
             self.duracion_contagio = 0
         else:
             self.duracion_contagio = self.duracion_contagio + 1 
 
-
+    def fallecer(self):
+        prob_fallecer = (1+PROB_MUERTE_EDAD[round(self.edad/10)])*(1+PROB_MUERTE_VARIANTE[self.tipo_contagio])-1
+        probabilidad_efeciva = self.random.random()
+        if(probabilidad_efeciva<prob_fallecer):
+            self.model.n_fallecidos = self.model.n_fallecidos+1
+            self.model.contagiados = self.model.contagiados-1
+            self.model.grid.remove_agent(self)
+            self.model.schedule.remove(self)
 
     # Creamos la funcion de movimiento de los agentes de forma aleatoria
     def move(self):
         # Guardamos en una lista las posibles casillas a las que se podria dirigir el agente
         possible_steps = self.model.grid.get_neighborhood(
             self.pos, moore=True, include_center=False )
-        
-        print(possible_steps)
-        
-        # No sabemos por que asi funciona 
-        # Comprobamos si de esa lista existe alguna que no este ocupada y hacemos otra lista
-        #for casilla in possible_steps:
-            
-            #if(self.model.grid.is_cell_empty(casilla) == False):
-                #possible_steps.remove(casilla)
-            
                 
         # Comprobamos que haya alguna casilla en esa lista de no ocupada
         if(len(possible_steps) > 0):
             
             new_position = self.random.choice(possible_steps)
-            print("OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO : ")
-            #print(new_position)
             if(self.model.grid.is_cell_empty(new_position) == True):
                 self.model.grid.move_agent(self, new_position)
-            #print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
         if(len(possible_steps)==0):
             print("No puedo moverme")

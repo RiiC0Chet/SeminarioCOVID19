@@ -2,6 +2,7 @@ from mesa import Model
 from Ejemplo_tutorial.agents import CovidAgent
 from mesa.time import RandomActivation
 from mesa.space import SingleGrid
+from mesa.datacollection import DataCollector
 import  numpy as np
 # imports para la generacion normal de la edad
 import scipy.stats as ss
@@ -39,7 +40,9 @@ class MoneyModel(Model):
         self.grid = SingleGrid(width, height, True)
         self.schedule = RandomActivation(self)
         self.contagios_iniciales = contagios_iniciales
-        
+        self.contagiados = contagios_iniciales
+        self.no_contagiados = number_of_agents - contagios_iniciales
+        self.n_fallecidos = 0
         # Calculamos la barrera poblacional inicialmente contagiada
         barrera_contagios_inicial = (contagios_iniciales/100)*number_of_agents
         
@@ -88,6 +91,12 @@ class MoneyModel(Model):
                     self.grid.place_agent(a, (x, y) )
                     break
             
+            self.datacollector_currents = DataCollector({
+            "Healthy Agents": MoneyModel.current_healthy_agents,
+            "Non Healthy AGents": MoneyModel.current_non_healthy_agents,
+            "Dead AGents": MoneyModel.current_dead_agents,})
+        
+
     #def get_cepa(self):
     #   return int(self.cepa_covid)
         #print (media/self.num_agents,"uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu",)
@@ -95,6 +104,7 @@ class MoneyModel(Model):
     def step(self):
         "Advance the model by one step."
         self.schedule.step()
+        self.datacollector_currents.collect(self)
 
     def capacidad_neta(self):
         sum=0
@@ -103,3 +113,15 @@ class MoneyModel(Model):
                 sum+=1
         capacidad_efectiva = self.capacidad_sanidad/100 - (sum/self.num_agents)
         return capacidad_efectiva
+    
+    @staticmethod
+    def current_healthy_agents(model) -> int:
+        return sum([1 for agent in model.schedule.agents if agent.tipo_contagio == 0])
+    
+    @staticmethod
+    def current_non_healthy_agents(model) -> int:
+        return sum([1 for agent in model. schedule. agents if agent.tipo_contagio != 0])
+
+    @staticmethod
+    def current_dead_agents(model) -> int:
+        return model.n_fallecidos

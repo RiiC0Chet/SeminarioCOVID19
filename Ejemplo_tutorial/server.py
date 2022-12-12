@@ -5,6 +5,8 @@ from mesa.visualization.UserParam import UserSettableParameter
 from Ejemplo_tutorial.model import MoneyModel
 from mesa.visualization.modules import CanvasGrid
 
+import mesa
+
 NUMBER_OF_CELLS = 20
 
 SIZE_OF_CANVAS_IN_PIXELS_X = 800
@@ -88,6 +90,18 @@ server = ModularServer (MoneyModel,
                         "Money Model",
                         model_params=simulation_params
                         )
+
+chart = mesa.visualization.ChartModule([
+                    {"Label": "Healthy Agents","Color": "Green"},
+                    {"Label": "Non Healthy AGents", "Color": "Red"},
+                    {"Label": "Dead AGents", "Color": "Black"}],
+                    data_collector_name='datacollector_currents')
+
+server = mesa.visualization.ModularServer(MoneyModel,
+                    [grid, chart],
+                    "Money Model",
+                    model_params=simulation_params)
+
 server.port = 8521
                     # The default
 server.launch()
