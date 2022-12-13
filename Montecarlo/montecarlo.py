@@ -4,7 +4,7 @@ import pandas as pd
 import math
 from math import exp
 #importamos los datos del excel en el que tenemos los datos de chile reales
-datos = pd.read_excel ('C:/Users/crisa/OneDrive/GIIADE/Cuarto Curso/Economía Mundial/Seminario/DatosChile.xlsx', skiprows=5 , names= ['Ptdatos', 'Atdatos', 'RRtdatos', 'Cftdatos', 'Ydtdatos'])
+datos = pd.read_excel ('C:/Users/jlric/OneDrive - ugr.es/carrera/Cuarto año/Primer cuatri/ADE/EM/python/tutorial/SeminarioCOVID19/Montecarlo/DatosChile.xlsx', skiprows=5 , names= ['Ptdatos', 'Atdatos', 'RRtdatos', 'Cftdatos', 'Ydtdatos'])
 #creamos las variables con los datos del excel de Chile
 global Pt_chile
 Pt_chile = datos['Ptdatos']
@@ -162,7 +162,7 @@ class Montecarlo():
         hoja = libro.add_worksheet()
         col =0
         for i in range(10):
-            datos = pd.read_excel ('C:/Users/crisa/OneDrive/GIIADE/Cuarto Curso/Economía Mundial/Seminario/Montecarlo'+ str(i)+'.xlsx', skiprows=5 , names= ['Pt_chile0', 'At_chile1', 'RRt_chile2', 'Cft_chile3','Ydt_chile4' ])
+            datos = pd.read_excel ('C:/Users/jlric/OneDrive - ugr.es/carrera/Cuarto año/Primer cuatri/ADE/EM/python/tutorial/SeminarioCOVID19/Montecarlo/Montecarlo'+ str(i)+'.xlsx', skiprows=5 , names= ['Pt_chile0', 'At_chile1', 'RRt_chile2', 'Cft_chile3','Ydt_chile4' ])
             global Pt_chile
             Pt_chile = datos['Pt_chile0']
             global At_chile

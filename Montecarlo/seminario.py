@@ -28,15 +28,15 @@ import statsmodels.api as sm
 
 
 #importamos los datos del excel en el que tenemos los datos de chile generados siguiendo distribuciones normales con montecarlo
-datos2 = pd.read_excel ('C:/Users/crisa/OneDrive/GIIADE/Cuarto Curso/Economía Mundial/Seminario/DatosChile_montecarlo.xlsx', skiprows=5 , names= ['Ptdatos', 'Atdatos', 'RRtdatos', 'Cftdatos', 'Ydtdatos'])
+datos2 = pd.read_excel ('C:/Users/jlric/OneDrive - ugr.es/carrera/Cuarto año/Primer cuatri/ADE/EM/python/tutorial/SeminarioCOVID19/Montecarlo/DatosChile_montecarlo.xlsx', skiprows=5 , names= ['Ptdatos', 'Atdatos', 'RRtdatos', 'Cftdatos', 'Ydtdatos'])
 #importamos los datos del excel en el que tenemos los datos de chile reales
-datos = pd.read_excel ('C:/Users/crisa/OneDrive/GIIADE/Cuarto Curso/Economía Mundial/Seminario/DatosChile.xlsx', skiprows=5 , names= ['Ptdatos', 'Atdatos', 'RRtdatos', 'Cftdatos', 'Ydtdatos'])
+datos = pd.read_excel ('C:/Users/jlric/OneDrive - ugr.es/carrera/Cuarto año/Primer cuatri/ADE/EM/python/tutorial/SeminarioCOVID19/Montecarlo/DatosChile.xlsx', skiprows=5 , names= ['Ptdatos', 'Atdatos', 'RRtdatos', 'Cftdatos', 'Ydtdatos'])
 #importamos los datos del excel que hemos generado con nuestro código para tener los datos con los que realizar Montecarlo
-datos_montecarlo = pd.read_excel ('C:/Users/crisa/OneDrive/GIIADE/Cuarto Curso/Economía Mundial/Seminario/Final.xlsx', skiprows=0 , names= ['0', '1', '2', '3', '4', '5','6','7','8','9','real'])
+datos_montecarlo = pd.read_excel ('C:/Users/jlric/OneDrive - ugr.es/carrera/Cuarto año/Primer cuatri/ADE/EM/python/tutorial/SeminarioCOVID19/Montecarlo/Final.xlsx', skiprows=0 , names= ['0', '1', '2', '3', '4', '5','6','7','8','9','real'])
 #importamos los datos del excel de la simulación 1
-datos_simulacion1 = pd.read_excel ('C:/Users/crisa/OneDrive/GIIADE/Cuarto Curso/Economía Mundial/Seminario/Simulacion1.xlsx', skiprows=0 , names= ['0', '1', '2', '3', '4', '5','6','7','8','9','real'])
+datos_simulacion1 = pd.read_excel ('C:/Users/jlric/OneDrive - ugr.es/carrera/Cuarto año/Primer cuatri/ADE/EM/python/tutorial/SeminarioCOVID19/Montecarlo/Simulacion1.xlsx', skiprows=0 , names= ['0', '1', '2', '3', '4', '5','6','7','8','9','real'])
 #importamos los datos del excel de la simulación 1
-datos_simulacion2 = pd.read_excel ('C:/Users/crisa/OneDrive/GIIADE/Cuarto Curso/Economía Mundial/Seminario/Simulacion2.xlsx', skiprows=0 , names= ['0', '1', '2', '3', '4', '5','6','7','8','9','real'])
+datos_simulacion2 = pd.read_excel ('C:/Users/jlric/OneDrive - ugr.es/carrera/Cuarto año/Primer cuatri/ADE/EM/python/tutorial/SeminarioCOVID19/Montecarlo/Simulacion2.xlsx', skiprows=0 , names= ['0', '1', '2', '3', '4', '5','6','7','8','9','real'])
 
 #creamos las variables con los datos del excel de Chile
 Pt_chile = datos['Ptdatos']
@@ -67,16 +67,16 @@ class Schelling():
     def __init__(self):
         #calibrado
         self.dibujar()
-        print("\nError cuadratico calibrado\n")
+        print("/nError cuadratico calibrado/n")
         print(self.error_cuadratico())
         #simulacion 1
         self.dibujar_simulacion1()
-        print("\nError cuadratico simulación 1\n")
+        print("/nError cuadratico simulación 1/n")
         print(self.error_simulacion1())
         #simulacion2
         self.dibujar_simulacion2()
         self.grafica_burbuja()
-        print("\nError cuadratico simulación 2\n")
+        print("/nError cuadratico simulación 2/n")
         print(self.error_simulacion2())
 
 ################################################################################### FÓRMULAS SOBRE EL MERCADO DE VIVIENDAS EN CHILE ##############################################

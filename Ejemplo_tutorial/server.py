@@ -4,8 +4,8 @@ from mesa.visualization.UserParam import UserSettableParameter
 
 from Ejemplo_tutorial.model import MoneyModel
 from mesa.visualization.modules import CanvasGrid
+from mesa.visualization.modules import ChartModule
 
-import mesa
 
 NUMBER_OF_CELLS = 20
 
@@ -85,19 +85,14 @@ def agent_portrayal(agent):
     return portrayal
 
 grid = CanvasGrid(agent_portrayal, NUMBER_OF_CELLS, NUMBER_OF_CELLS, SIZE_OF_CANVAS_IN_PIXELS_X, SIZE_OF_CANVAS_IN_PIXELS_Y)
-server = ModularServer (MoneyModel,
-                        [grid],
-                        "Money Model",
-                        model_params=simulation_params
-                        )
 
-chart = mesa.visualization.ChartModule([
+chart = ChartModule([
                     {"Label": "Healthy Agents","Color": "Green"},
                     {"Label": "Non Healthy AGents", "Color": "Red"},
                     {"Label": "Dead AGents", "Color": "Black"}],
                     data_collector_name='datacollector_currents')
 
-server = mesa.visualization.ModularServer(MoneyModel,
+server = ModularServer(MoneyModel,
                     [grid, chart],
                     "Money Model",
                     model_params=simulation_params)

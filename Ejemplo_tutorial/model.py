@@ -29,6 +29,7 @@ class MoneyModel(Model):
         self.capacidad_sanidad = capacidad_sanidad
         self.cepa_covid = cepa_covid
         self.arr_agents = []
+        self.running = True
         # Cambiamos a tipo de variable entera en funcion de la cepa para poder operar mejor
         if(cepa_covid == "Cepa leve"):
             self.cepa_covid = CEPA_LEVE
