@@ -3,7 +3,7 @@ import xlsxwriter
 import pandas as pd
 import math
 from math import exp
-import xlrd
+import openpyxl
 from Ejemplo_tutorial.model import MoneyModel
 #importamos los datos del excel en el que tenemos los datos de chile reales
 #datos = pd.read_excel ('C:/Users/jlric/OneDrive - ugr.es/carrera/Cuarto año/Primer cuatri/ADE/EM/python/tutorial/SeminarioCOVID19/Mundo_en_cifras/El_Mundo_en_Cifras_13_12_2022_16_35_23.xlsx', skiprows=7 , names= ['Año', 'Atdatos', 'RRtdatos', 'Cftdatos', 'Ydtdatos'])
@@ -26,8 +26,9 @@ poblacion_contagios = []
 capacidad_sanidad = []
 tipo_cepa = []
 
-for i in range (10):
-    n_ciudadanos.append(np.random.randint(1,200))
+NUM_MUESTRAS = 100
+for i in range (NUM_MUESTRAS):
+    n_ciudadanos.append(np.random.randint(150,200))
     libre_movimiento.append(np.random.randint(1,100))
     poblacion_contagios.append(np.random.randint(1,100))
     capacidad_sanidad.append(np.random.randint(1,100))
@@ -51,7 +52,8 @@ b1 = 1
 b2 = -0.1
 class Montecarlo():
     def __init__(self) -> None:
-        self.todos_montecarlo()
+        self.Rvt_todos()
+        #self.todos_montecarlo()
 
 
     #Esta función crea un archivo excel donde almacenará todos los datos que vaya creando para montecarlo
@@ -174,32 +176,32 @@ class Montecarlo():
     #     Et_psicologicos_Rt1= suma * beta
     #     return Et_psicologicos_Rt1
     
-    def mse(vec1, vec2):
-        return sum((vec1 - vec2)**2) / len(vec1)
+    def mse(self,vec1, vec2):
+        return sum((np.array(vec1) - np.array(vec2))**2) / len(vec1)
 
     def Rvt_todos(self):
-        menor_error = 999999
-        row = 0
+        menor_error = 9999999999999999
+        row_ = 0
         
         #contagios_reales = pd.read_excel ('C:/Users/jlric/OneDrive - ugr.es/carrera/Cuarto año/Primer cuatri/ADE/EM/python/tutorial/SeminarioCOVID19/Mundo_en_cifras/El_Mundo_en_Cifras_13_12_2022_16_35_23.xlsx', skiprows=7 , names= ['España'])
         # Abrir el archivo XLSX
-        wb = openpyxl.load_workbook('..\Mundo_en_cifras\El_Mundo_en_Cifras_13_12_2022_16_35_23.xlsx')
+        wb = openpyxl.load_workbook('cifras_contagios.xlsx')
 
         # Seleccionar la hoja de trabajo que queremos leer
-        ws = wb.sheet_by_name('El_Mundo_en_Cifras_13_12_2022_1')
+        ws = wb['Hoja1']
 
         # Crear una lista para almacenar los valores leídos
         contagios_reales = []
 
         # Iterar a través de las 40 primeras filas de la columna "España"
-        for row in range(8,48):
+        for row in ws['C2:C41']:
             # Agregar el valor de la celda a la lista
-            contagios_reales.append(ws.cell(row, ws.row_len(row)-1).value)
-        print(contagios_reales)
+            contagios_reales.append(row[0].value)
+        #print(contagios_reales)
         # Cerrar el archivo XLSX
         wb.close()
 
-        for i in range (10):
+        for i in range (NUM_MUESTRAS):
             modelo = MoneyModel(n_ciudadanos[i],
                                         libre_movimiento[i],
                                         capacidad_sanidad[i],
@@ -208,13 +210,13 @@ class Montecarlo():
             contagios_simulacion=[]
             for j in range (40):
                 modelo.step()
-                contagios_simulacion += modelo.current_non_healthy_agents*(47000000/n_ciudadanos[i])
-                
-            if(menor_error > self.mse(contagios_simulacion, contagios_reales)):
-                menor_error = self.mse(contagios_simulacion, contagios_reales)
-                row = i
+                contagios_simulacion.append(modelo.current_non_healthy_agents(modelo) *(47000000/n_ciudadanos[i])) 
+            error_cuad = self.mse(contagios_simulacion, contagios_reales)
+            if(menor_error > error_cuad):
+                menor_error = error_cuad
+                row_ = i
+            #print(error_cuad , i)
             
-            
-
+        print ("Numero ciudadanos: " , n_ciudadanos[row_] ,"Porcentaje libre movimiento: " ,  libre_movimiento[row_], "Capacidad sanidad: " , capacidad_sanidad[row_], "Poblacion inicialmente contagiada: " ,poblacion_contagios[row_], "Tipo de cepa: ",tipo_cepa[row_], "Iteracion donde se consigue: ", row_)
 
 ejecutar = Montecarlo()

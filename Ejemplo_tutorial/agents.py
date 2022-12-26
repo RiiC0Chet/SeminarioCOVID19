@@ -12,7 +12,7 @@ NO_MOVILIDAD = 1
 # Probabilidades de contagio en funcion de la variante covid
 PROB_CONTAGIO_VARIANTE = numpy.array([0.0,0.2,0.4,0.6])
 
-PROB_MUERTE_VARIANTE = numpy.array([0.0,0.02,0.04,0.06])
+PROB_MUERTE_VARIANTE = numpy.array([0.0,0.005,0.01,0.015])
 
 
 # Probabilidades de contagio extra en funcion de la edad
@@ -33,7 +33,7 @@ PROB_CONTAGIO_EDAD = numpy.array([0.05,0.1,0.15,0.2,0.25,0.35,0.45,0.5,0.55,0.6]
 # Probabilidades de muerte en funcion de la edad
 # Para el codigo simplemente dividiremos la edad entre 10 y nos 
 # indicará la posición del vector a la que tenemos que ir.
-PROB_MUERTE_EDAD = numpy.array([0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1])
+PROB_MUERTE_EDAD = numpy.array([0.001,0.002,0.003,0.004,0.005,0.006,0.007,0.008,0.009,0.01])
 
 #PROB_FALLECIMIENTO_1_10 = 0.01
 #PROB_FALLECIMIENTO_11_20 = 0.02
@@ -130,6 +130,7 @@ class CovidAgent(Agent):
 
     def fallecer(self):
         prob_fallecer = (1+PROB_MUERTE_EDAD[round(self.edad/10)])*(1+PROB_MUERTE_VARIANTE[self.tipo_contagio])-1
+        
         probabilidad_efeciva = self.random.random()
         if(probabilidad_efeciva<prob_fallecer):
             self.model.n_fallecidos = self.model.n_fallecidos+1

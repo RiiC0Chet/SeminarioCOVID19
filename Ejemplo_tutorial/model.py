@@ -58,7 +58,7 @@ class MoneyModel(Model):
         for i in range(self.num_agents):
             
             nums = 0
-            for j in range(11):
+            for j in range(10):
                 nums += random.randint(1, 10)
             
             nums -= 10
