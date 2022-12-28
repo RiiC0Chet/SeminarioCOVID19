@@ -26,7 +26,7 @@ poblacion_contagios = []
 capacidad_sanidad = []
 tipo_cepa = []
 
-NUM_MUESTRAS = 100
+NUM_MUESTRAS = 10
 for i in range (NUM_MUESTRAS):
     n_ciudadanos.append(np.random.randint(150,200))
     libre_movimiento.append(np.random.randint(1,100))
@@ -208,6 +208,9 @@ class Montecarlo():
                                         poblacion_contagios[i],
                                         tipo_cepa[i],20,20)
             contagios_simulacion=[]
+            # el numero de steps lo dejamos a 40 por falta de tiempo, ya que en funcion del numero de row que queramos analizar el tiempo es de tipo O cuadratico al tener
+            # el bucle anidado, por lo que seria muy inficiente en tiempo y memoria
+            ## como se almacenaria en excel los datacollector de x iteracion -------------------------------------------------
             for j in range (40):
                 modelo.step()
                 contagios_simulacion.append(modelo.current_non_healthy_agents(modelo) *(47000000/n_ciudadanos[i])) 
