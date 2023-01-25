@@ -1,5 +1,9 @@
+# TRABAJO REALIZADO POR:
+#   Jose Luis Rico Ramos
+#   Miguel Tirado Guzmán
+#
 from mesa import Model
-from Ejemplo_tutorial.agents import CovidAgent
+from SeminarioCovid.agents import CovidAgent
 from mesa.time import RandomActivation
 from mesa.space import SingleGrid
 from mesa.datacollection import DataCollector
@@ -18,7 +22,7 @@ CEPA_AGRESIVA = 3
 
 LIBRE_MOVIMIENTO = 0
 NO_MOVILIDAD = 1
-class MoneyModel(Model):
+class CovidModel(Model):
     "A model with some number of agents."
 
     def __init__(self, number_of_agents,porcentaje_libre_movimiento,capacidad_sanidad,contagios_iniciales,cepa_covid, width, height):
@@ -79,11 +83,9 @@ class MoneyModel(Model):
                     a = CovidAgent(i, self, tipo_contagio=self.cepa_covid ,edad=nums,cepa_covid=self.cepa_covid, movimiento=NO_MOVILIDAD)
             
             self.arr_agents=np.append(self.arr_agents, a)
-
-            #print (nums,"ppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp",)
             self.schedule.add(a)
 
-            # Add the agent to a random grid cell
+            # Añadir el agente en una posicion aleatoria
             while True:
                 x = self.random.randrange(self.grid.width)
                 y = self.random.randrange(self.grid.height)
@@ -96,17 +98,13 @@ class MoneyModel(Model):
             "Healthy Agents": MoneyModel.current_healthy_agents,
             "Non Healthy AGents": MoneyModel.current_non_healthy_agents,
             "Dead AGents": MoneyModel.current_dead_agents,})
-        
-
-    #def get_cepa(self):
-    #   return int(self.cepa_covid)
-        #print (media/self.num_agents,"uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu",)
     
     def step(self):
-        "Advance the model by one step."
+        "Avanzamos el modelo en una iteracion."
         self.schedule.step()
         self.datacollector_currents.collect(self)
 
+    #Calculo de la capacidad neta efectiva de la sanidad (La capacidad de acoger a mas enfermos)
     def capacidad_neta(self):
         sum=0
         for i in range(self.num_agents):
@@ -115,14 +113,17 @@ class MoneyModel(Model):
         capacidad_efectiva = self.capacidad_sanidad/100 - (sum/self.num_agents)
         return capacidad_efectiva
     
+    #Funcion para comprobar cuantos agentes sanos hay
     @staticmethod
     def current_healthy_agents(model) -> int:
         return sum([1 for agent in model.schedule.agents if agent.tipo_contagio == 0])
     
+    #Funcion para comprobar cuantos agentes enfermos hay
     @staticmethod
     def current_non_healthy_agents(model) -> int:
         return sum([1 for agent in model. schedule. agents if agent.tipo_contagio != 0])
 
+    #Funcion para comprobar cuantos fallecidos hay
     @staticmethod
     def current_dead_agents(model) -> int:
         return model.n_fallecidos

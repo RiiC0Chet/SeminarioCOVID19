@@ -1,4 +1,6 @@
-# TRABAJO REALIZADO POR:
+# Trabajo realizado por
+#  Jose Luis Rico Ramos y Miguel Tirado Guzmán,
+# Basado en el trabajo de:
 #   Cristina Aranda García-Torres
 #   Paula Hernández Lozano
 

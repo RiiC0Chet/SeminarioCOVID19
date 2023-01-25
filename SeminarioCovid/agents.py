@@ -1,3 +1,9 @@
+# TRABAJO REALIZADO POR:
+#   Jose Luis Rico Ramos
+#   Miguel Tirado Guzmán
+#
+
+
 from mesa import Agent
 import numpy
 
@@ -20,31 +26,12 @@ PROB_MUERTE_VARIANTE = numpy.array([0.0,0.005,0.01,0.015])
 # indicará la posición del vector a la que tenemos que ir.
 PROB_CONTAGIO_EDAD = numpy.array([0.05,0.1,0.15,0.2,0.25,0.35,0.45,0.5,0.55,0.6])
 
-#PROB_CONTAGIO_11_20 = 0.1
-#PROB_CONTAGIO_21_30 = 0.15
-#PROB_CONTAGIO_31_40 = 0.20
-#PROB_CONTAGIO_41_50 = 0.25
-#PROB_CONTAGIO_51_60 = 0.35
-#PROB_CONTAGIO_61_70 = 0.45
-#PROB_CONTAGIO_71_80 = 0.50
-#PROB_CONTAGIO_81_90 = 0.55
-#PROB_CONTAGIO_91_100 = 0.60
 
 # Probabilidades de muerte en funcion de la edad
 # Para el codigo simplemente dividiremos la edad entre 10 y nos 
 # indicará la posición del vector a la que tenemos que ir.
 PROB_MUERTE_EDAD = numpy.array([0.001,0.002,0.003,0.004,0.005,0.006,0.007,0.008,0.009,0.01])
 
-#PROB_FALLECIMIENTO_1_10 = 0.01
-#PROB_FALLECIMIENTO_11_20 = 0.02
-#PROB_FALLECIMIENTO_21_30 = 0.03
-#PROB_FALLECIMIENTO_31_40 = 0.04
-#PROB_FALLECIMIENTO_41_50 = 0.05
-#PROB_FALLECIMIENTO_51_60 = 0.06
-#PROB_FALLECIMIENTO_61_70 = 0.07
-#PROB_FALLECIMIENTO_71_80 = 0.08
-#PROB_FALLECIMIENTO_81_90 = 0.09
-#PROB_FALLECIMIENTO_91_100 = 0.1
 
 # Tiempo contagiado en funcion de la variante covid
 TIEMPO_CONTAGIO = numpy.array([0,7,10,12])
@@ -52,6 +39,7 @@ PROBABILIDAD_CURA = numpy.array([0,0.30,0.20,0.10])
 
 class CovidAgent(Agent):
 
+    # Constrcutor de nuestro agente, en el que le daremos valor a cada una de las variables de clase
     def __init__(self, unique_id, model, tipo_contagio, edad, cepa_covid, movimiento):
         super().__init__(unique_id, model)
         self.tipo_contagio = int(tipo_contagio)
@@ -61,7 +49,11 @@ class CovidAgent(Agent):
         self.libre_movimiento = movimiento
 
 
-    # funcion por frames del modelo
+    # funcion por frames del modelo, donde se ejecutara en cada una de las etapas
+    #La funcion es simple:
+    #1. Evaluamos si el agente es de los que tienen libertad de movimiento, si es así se mueve
+    #2. Si no estaba contagiado miramos si se contagia en la nueva posición
+    #3. Si estaba contagiado miramos si fallece o se cura
     def step(self):
         if(self.libre_movimiento == LIBRE_MOVIMIENTO):
             self.move()
@@ -73,8 +65,6 @@ class CovidAgent(Agent):
     
     # funcion en la que comprobamos si se va a contagiar el nuevo agente o no
     def contagiarse(self):
-        #cellmates = self.model.grid.get_cell_list_contents([self.pos])
-
         # nos recorremos cada uno de los agentes de las celdas de al rededor
         for agente in self.model.grid.get_neighbors(self.pos,True):
             
@@ -94,22 +84,26 @@ class CovidAgent(Agent):
                 if( (self.pos[0]+self.pos[1])-(agente.pos[0]+agente.pos[1]) == 0 
                     or (self.pos[0]+self.pos[1])-(agente.pos[0]+agente.pos[1]) == 2
                     or (self.pos[0]+self.pos[1])-(agente.pos[0]+agente.pos[1]) == -2):
+                    #Este es el caso de celdas DIAGONALES
                     # probabilidad_contagio += 0.1
                     # Lo multiplicamos por 0.95 porque así tiene decrecen las probabilidades en un 5%
                     probabilidad_contagio = PROB_CONTAGIO_VARIANTE[self.cepa_covid] *(1 +  PROB_CONTAGIO_EDAD[round(self.edad/10)])*0.95
                 else:
+                    #Caso de las celdas NO DIAGONALES
                     probabilidad_contagio = PROB_CONTAGIO_VARIANTE[self.cepa_covid] *(1 +  PROB_CONTAGIO_EDAD[round(self.edad/10)])*1.1
                 
                 # si el numero aleatorio entre 0 y 1 sale menor se cumple la probabilidad
                 probabilidad_efeciva = self.random.random()
                 if( probabilidad_efeciva < probabilidad_contagio):
-                    #print(probabilidad_efeciva,"          ",probabilidad_contagio)
+                    #Si finalmente se contagia, lo registramos
                     self.model.no_contagiados = self.model.no_contagiados - 1
                     self.model.contagiados = self.model.contagiados + 1
                     self.tipo_contagio = agente.tipo_contagio
     
-    # Comprobamos si esta contagiado, si ya se ha curado o no
+    # Si esta contagiado, comprobamos si ya se ha curado o no
     def curarse(self):
+        #Calculamos la probabilidad de cura, la cual es una funcion exponencial al tiempo que lleva
+        # contagiado y también se ve afectada por la capacidad neta de la sanidad en ese momento.
         probabilidad_cura = ((1+PROBABILIDAD_CURA[self.cepa_covid])**(self.duracion_contagio - TIEMPO_CONTAGIO[self.tipo_contagio])-1)
 
         # Si fuesen iguales estaríamos exponiendo a 0 y al sumar 1 la probabilidad es de 1
@@ -119,7 +113,9 @@ class CovidAgent(Agent):
 
         probabilidad_cura = probabilidad_cura + (probabilidad_cura * (self.model.capacidad_neta()))
 
-
+        # En funcion del tipo de contagio el tiempo de duracion no es el mismo, por lo que comprobamos  que ya ha pasado el tiempo 
+        # suficiente contagiado, como para curarse, accediendo al vectror de TIEMPO_CONTAGIO, donde se almacena el tiempo que ha 
+        # de estar cada agente contagiado antes de curarse
         if (self.duracion_contagio > TIEMPO_CONTAGIO[self.tipo_contagio] and self.random.random() < (probabilidad_cura)):
             self.model.no_contagiados = self.model.no_contagiados + 1
             self.model.contagiados = self.model.contagiados-1
@@ -127,7 +123,9 @@ class CovidAgent(Agent):
             self.duracion_contagio = 0
         else:
             self.duracion_contagio = self.duracion_contagio + 1 
-
+    
+    # Comprobamos con esta funcion en cada iteracion si el agente va a morirse o no, en caso de que la probabilidad ponderada, 
+    # por la edad, por el tipo de cepa, el agente puede  morirse y desaparecer del modelo
     def fallecer(self):
         prob_fallecer = (1+PROB_MUERTE_EDAD[round(self.edad/10)])*(1+PROB_MUERTE_VARIANTE[self.tipo_contagio])-1
         
@@ -148,6 +146,8 @@ class CovidAgent(Agent):
         if(len(possible_steps) > 0):
             
             new_position = self.random.choice(possible_steps)
+            
+            # Comprobamos que la celda a la que nos vamos a mover este libre, ya que trabajamos con un SingleGrid
             if(self.model.grid.is_cell_empty(new_position) == True):
                 self.model.grid.move_agent(self, new_position)
         if(len(possible_steps)==0):

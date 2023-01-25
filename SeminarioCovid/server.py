@@ -1,12 +1,17 @@
+# TRABAJO REALIZADO POR:
+#   Jose Luis Rico Ramos
+#   Miguel Tirado Guzmán
+#
+
 from mesa.visualization.modules import CanvasGrid
 from mesa.visualization.ModularVisualization import ModularServer
 from mesa.visualization.UserParam import UserSettableParameter
 
-from Ejemplo_tutorial.model import MoneyModel
+from SeminarioCovid.model import CovidModel
 from mesa.visualization.modules import CanvasGrid
 from mesa.visualization.modules import ChartModule
 
-
+# Numero de celadas que tendra nuestro modelo
 NUMBER_OF_CELLS = 20
 
 SIZE_OF_CANVAS_IN_PIXELS_X = 800
@@ -92,7 +97,7 @@ chart = ChartModule([
                     {"Label": "Dead AGents", "Color": "Black"}],
                     data_collector_name='datacollector_currents')
 
-server = ModularServer(MoneyModel,
+server = ModularServer(CovidModel,
                     [grid, chart],
                     "Money Model",
                     model_params=simulation_params)
